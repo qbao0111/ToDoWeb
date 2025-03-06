@@ -51,6 +51,23 @@ namespace ToDoWeb.Controllers
             {
                 _courseService.AssignCourse(StudentId, CourseId);
             }
-        
+
+            [HttpPut("grades")]
+            public int UpgradeGrades(int StudentId, int CourseId, float Assignment, float Final, float Practical)
+            {
+                return _courseService.UpgradeGrades(StudentId, CourseId , Assignment, Final, Practical);
+            }
+
+            [HttpGet("gradesDetail")]
+            public GradesDetailModel GetGradesDetail(int id)
+            {
+            return _courseService.GetGradesDetail(id);
+            }
+        [HttpGet("Gpa")]
+        public GpaViewModel GetGPA(int id)
+        {
+            return _courseService.GetGPA(id);
+        }
+
     }
     }

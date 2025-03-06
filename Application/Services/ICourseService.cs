@@ -12,7 +12,11 @@ namespace ToDoWeb.Application.Services
         IEnumerable<CourseViewModel> GetCourses(string? courseId);
         CourseDetailModel GetCourseDetail(int id);
 
-        public void AssignCourse(int StudentId, int CourseId);
+        void AssignCourse(int StudentId, int CourseId);
+        int UpgradeGrades(int StudentId, int CourseId, float Assignment, float Final, float Practical);
+        GradesDetailModel GetGradesDetail(int id);
+        GpaViewModel GetGPA(int id);
+
         int PostCourse(CourseCreateModel course);
 
         int PutCourse(CourseUpdateModel course);
@@ -85,10 +89,10 @@ namespace ToDoWeb.Application.Services
         {
             var student = _context.Student.Find(StudentId);
             var course = _context.Courses.Find(CourseId);
-            if (student == null || course == null) return ;
+            if (student == null || course == null) return;
 
             var isAssigned = _context.CourseStudent.Any(cs => cs.StudentId == student.Id && cs.CourseId == course.Id);
-            if (isAssigned) return ;
+            if (isAssigned) return;
 
             var data = new CourseStudent
             {
@@ -124,6 +128,72 @@ namespace ToDoWeb.Application.Services
                 Student = student
             };
         }
+    
+
+
+    public int UpgradeGrades(int StudentId, int CourseId, float Assignment, float Final, float Practical)
+        {
+            var student = _context.Student.Find(StudentId);
+            var course = _context.Courses.Find(CourseId);
+            var data = _context.CourseStudent.Find(CourseId, StudentId);
+            if (student == null || course == null) return 0;
+            if(data != null)
+            {
+                data.Assignment = Assignment;
+                data.Final = Final;
+                data.Practical = Practical;
+                _context.SaveChanges();
+                return data.StudentId;
+            }
+            return 0;
+                
+        }
+
+        public GradesDetailModel GetGradesDetail(int id)
+        {
+            var student = _context.Student.Find(id); //DbSet<Courses>
+            if (student == null) return null;
+
+            var course = _context.CourseStudent
+                .Include(x => x.Course)
+                .Where(x => x.StudentId == id)
+                .Select(x => new CourseViewModel
+                {
+                    CourseId = x.CourseId,
+                    CourseName = x.Course.Name,
+                    StartDate = x.Course.StartDate,
+                    Assignment = x.Assignment,
+                    Final = x.Final,
+                    Practical = x.Practical
+                }).ToList();
+
+
+            return new GradesDetailModel
+            {
+                Id = student.Id,
+                Name = student.FirstName + ' ' + student.LastName,
+                courses = course
+            };
+        }
+
+
+        public GpaViewModel GetGPA(int id) 
+        {
+            var student = _context.Student.Find(id);
+            if (student == null) return null;
+
+            var gpa = _context.CourseStudent
+                .Where(x => x.StudentId == id)
+                .Average(x => (x.Practical + x.Final + x.Assignment)  / 3 );
+
+            return new GpaViewModel
+            {
+                Id = student.Id,
+                Name = student.FirstName + ' ' + student.LastName,
+                Gpa = gpa
+            };
+        }
     }
+
 }
 
