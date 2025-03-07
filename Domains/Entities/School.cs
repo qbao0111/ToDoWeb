@@ -6,7 +6,7 @@
         public string Name { get; set; }
         public string Address { get; set; }
 
-        public ICollection<Student> Students { get; set; }
+        public virtual ICollection<Student> Students { get; set; }
 
     }
 }

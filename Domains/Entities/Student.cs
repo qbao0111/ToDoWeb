@@ -35,8 +35,8 @@ namespace ToDoWeb.Domains.Entities
 
         [ForeignKey("School")]
         public int SId { get; set; }
-        public School School { get; set; }
+        public virtual School School { get; set; }
 
-        public ICollection<CourseStudent> CourseStudents { get; set; }
+        public virtual ICollection<CourseStudent> CourseStudents { get; set; }
     }
 }

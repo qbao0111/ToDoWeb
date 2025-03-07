@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using ToDoWeb.Domains.Entities;
 
 namespace ToDoWeb.Infrastructures
@@ -11,6 +12,8 @@ namespace ToDoWeb.Infrastructures
 
         public DbSet<CourseStudent> CourseStudent { get; set; }
         public DbSet<Course> Courses { get; set; }
+
+        public EntityEntry<T> Entry<T>(T entity) where T : class;
         public int SaveChanges();
     }
 }

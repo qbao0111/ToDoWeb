@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using ToDoWeb.Domains.Entities;
 using ToDoWeb.Infrastructures.DatabaseMapping;
 
@@ -19,8 +21,10 @@ namespace ToDoWeb.Infrastructures
         public DbSet<School> School { get; set; }
         public DbSet<CourseStudent> CourseStudent { get; set; }
         public DbSet<Course> Courses { get; set; }
+        public DbSet<AuditLog> AuditLog { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            //optionsBuilder.UseLazyLoadingProxies();
             optionsBuilder.UseSqlServer("Server=THUDONG\\SQLEXPRESS ; Database=ToDoApp;Trusted_Connection=True;TrustServerCertificate=True");
         }
 
@@ -49,7 +53,38 @@ namespace ToDoWeb.Infrastructures
         }
         public int SaveChanges()
         {
+            var auditLogs = new List<AuditLog>();
+            foreach (var entity in ChangeTracker.Entries())
+            {
+                var log = new AuditLog
+                {
+                    EntityName = entity.Entity.GetType().Name,
+                    CreatedAt = DateTime.Now,
+                    Action = entity.State.ToString(),
+                };
+                if(entity.State == EntityState.Added)
+                {
+                    log.NewValue = JsonSerializer.Serialize(entity.CurrentValues.ToObject());
+                }
+                if(entity.State == EntityState.Modified)
+                {
+                    log.OldValue = JsonSerializer.Serialize(entity.OriginalValues.ToObject());
+                    log.NewValue = JsonSerializer.Serialize(entity.CurrentValues.ToObject());
+                }
+                if(entity.State == EntityState.Deleted)
+                {
+                    log.OldValue = JsonSerializer.Serialize(entity.OriginalValues.ToObject());
+                }
+
+                auditLogs.Add(log);
+            }
+            AuditLog.AddRange(auditLogs);
             return base.SaveChanges();
+        }
+
+        public EntityEntry<T> Entry<T>(T entity) where T : class
+        {
+            return base.Entry(entity);
         }
     }
 }

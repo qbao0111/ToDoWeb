@@ -8,6 +8,7 @@ namespace ToDoApp.Application.Services
     {
         IEnumerable<SchoolViewModel> GetSchools(string? address);
 
+        public SchoolStudentModel GetSchoolDetail(int id);
         int PostSchool(SchoolCreatedModel school);
 
         int PutSchool(SchoolUpdatedModel school);
@@ -50,10 +51,13 @@ namespace ToDoApp.Application.Services
                 Name = school.Name,
                 Address = school.Address
             };
-
+            var state = _context.Entry(data).State;
+            
             _context.School.Add(data);
-            _context.SaveChanges();
+            state = _context.Entry(data).State;
 
+            _context.SaveChanges();
+            
             return data.Id;
         }
 
@@ -76,6 +80,33 @@ namespace ToDoApp.Application.Services
 
             _context.School.Remove(data);
             _context.SaveChanges();
+        }
+
+        public SchoolStudentModel GetSchoolDetail(int schoolId)
+        {
+            var school = _context.School.Find(schoolId);
+            if(school == null)
+            {
+                return null;
+            }
+
+
+            //SELECT * FROM Student WHERE SchoolId = schoolId
+            _context.Entry(school).Collection(x => x.Students).Load();
+            var students = school.Students;
+            return new SchoolStudentModel
+            {
+                Id = schoolId,
+                Name = school.Name,
+                Address = school.Address,
+                Students = students.Select(x => new StudentViewModel
+                {
+                    Id = x.Id,
+                    FullName = x.FirstName + " " + x.LastName,
+                    Age = x.Age,
+                }).ToList()
+            };
+            
         }
     }
 }

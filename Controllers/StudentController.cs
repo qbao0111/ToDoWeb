@@ -21,6 +21,8 @@ namespace ToDoApp.Controllers
         {
             return _studentService.GetStudentDetail(id);
         }
+
+
        
 
         [HttpGet]

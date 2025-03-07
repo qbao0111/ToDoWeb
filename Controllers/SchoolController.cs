@@ -23,6 +23,12 @@ namespace ToDoApp.Controllers
             return _schoolService.GetSchools(address);
         }
 
+        [HttpGet("{id}")]
+        public SchoolStudentModel GetSchoolDetail(int id)
+        {
+            return _schoolService.GetSchoolDetail(id);
+        }
+
         [HttpPost]
         public int PostSchool(SchoolCreatedModel school)
         {
