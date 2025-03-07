@@ -115,8 +115,9 @@ namespace ToDoWeb.Application.Services
                 .Select(x => new StudentViewModel
                 {
                     Id = x.Id,
-                    FullName = x.FirstName + " " + x.LastName,
+                    FullName = x.LastName + " " + x.FirstName,
                     Age = x.Age,
+                    
                 }).ToList();
 
 

@@ -62,7 +62,6 @@ namespace ToDoApp.Application.Services
                     Id = x.Id,
                     FullName = x.FirstName + " " + x.LastName,
                     Age = x.Age,
-                    SchoolName = x.School.Name
                 })
                 .ToList();
             //trước .ToList() là trên memory hết
