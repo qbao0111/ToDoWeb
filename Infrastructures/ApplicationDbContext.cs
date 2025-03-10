@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using ToDoWeb.Domains.Entities;
 using ToDoWeb.Infrastructures.DatabaseMapping;
+using ToDoWeb.Infrastructures.Interceptors;
 
 namespace ToDoWeb.Infrastructures
     
@@ -26,6 +27,7 @@ namespace ToDoWeb.Infrastructures
         {
             //optionsBuilder.UseLazyLoadingProxies();
             optionsBuilder.UseSqlServer("Server=THUDONG\\SQLEXPRESS ; Database=ToDoApp;Trusted_Connection=True;TrustServerCertificate=True");
+            optionsBuilder.AddInterceptors(new SqlQuerryLoggingInterceptor(), new AuditLogInterceptor());
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -53,32 +55,32 @@ namespace ToDoWeb.Infrastructures
         }
         public int SaveChanges()
         {
-            var auditLogs = new List<AuditLog>();
-            foreach (var entity in ChangeTracker.Entries())
-            {
-                var log = new AuditLog
-                {
-                    EntityName = entity.Entity.GetType().Name,
-                    CreatedAt = DateTime.Now,
-                    Action = entity.State.ToString(),
-                };
-                if(entity.State == EntityState.Added)
-                {
-                    log.NewValue = JsonSerializer.Serialize(entity.CurrentValues.ToObject());
-                }
-                if(entity.State == EntityState.Modified)
-                {
-                    log.OldValue = JsonSerializer.Serialize(entity.OriginalValues.ToObject());
-                    log.NewValue = JsonSerializer.Serialize(entity.CurrentValues.ToObject());
-                }
-                if(entity.State == EntityState.Deleted)
-                {
-                    log.OldValue = JsonSerializer.Serialize(entity.OriginalValues.ToObject());
-                }
+            //var auditLogs = new List<AuditLog>();
+            //foreach (var entity in ChangeTracker.Entries())
+            //{
+            //    var log = new AuditLog
+            //    {
+            //        EntityName = entity.Entity.GetType().Name,
+            //        CreatedAt = DateTime.Now,
+            //        Action = entity.State.ToString(),
+            //    };
+            //    if(entity.State == EntityState.Added)
+            //    {
+            //        log.NewValue = JsonSerializer.Serialize(entity.CurrentValues.ToObject());
+            //    }
+            //    if(entity.State == EntityState.Modified)
+            //    {
+            //        log.OldValue = JsonSerializer.Serialize(entity.OriginalValues.ToObject());
+            //        log.NewValue = JsonSerializer.Serialize(entity.CurrentValues.ToObject());
+            //    }
+            //    if(entity.State == EntityState.Deleted)
+            //    {
+            //        log.OldValue = JsonSerializer.Serialize(entity.OriginalValues.ToObject());
+            //    }
 
-                auditLogs.Add(log);
-            }
-            AuditLog.AddRange(auditLogs);
+            //    auditLogs.Add(log);
+            //}
+            //AuditLog.AddRange(auditLogs);
             return base.SaveChanges();
         }
 
